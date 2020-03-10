@@ -45,6 +45,7 @@
 
 [Protocols]
   gEfiUsb2HcProtocolGuid
+  gEfiPciIoProtocolGuid
 
 [Sources]
   UsbDumpEfi.h

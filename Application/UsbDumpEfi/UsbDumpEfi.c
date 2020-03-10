@@ -38,21 +38,30 @@ UsbDumpEfiMain (
   EFI_HANDLE    *UsbHcHandles;
 
   EFI_USB2_HC_PROTOCOL *UsbHc;
+  EFI_PCI_IO_PROTOCOL *PciIo;
 
   UINT8   MaxSpeed;
   UINT8   Ports;
   UINT8 Is64Bit;
 
   EFI_USB_PORT_STATUS portStatus;
+  UINTN PciSegment;
+  UINTN PciBus;
+  UINTN PciDevice;
+  UINTN PciFuntion;
 
   Status = gBS->LocateHandleBuffer (ByProtocol, &gEfiUsb2HcProtocolGuid, NULL, &UsbHcCount, &UsbHcHandles);
   
   for (UINTN i = 0; i < UsbHcCount; i++) {
     Status = gBS->OpenProtocol (UsbHcHandles[i], &gEfiUsb2HcProtocolGuid, (VOID**)&UsbHc, NULL, ImageHandle, EFI_OPEN_PROTOCOL_GET_PROTOCOL);
+   // Print (L"USB status %u\n", Status);
+    Status = gBS->OpenProtocol (UsbHcHandles[i], &gEfiPciIoProtocolGuid, (VOID**)&PciIo, NULL, ImageHandle, EFI_OPEN_PROTOCOL_GET_PROTOCOL);
+   // Print (L"PCI status %u\n", Status);
 
     Status = UsbHc->GetCapability (UsbHc, &MaxSpeed, &Ports, &Is64Bit);
+    Status = PciIo->GetLocation (PciIo, &PciSegment, &PciBus, &PciDevice, &PciFuntion);
 
-    Print (L"Found %u (%u ports, speed %u)\n", i, Ports, MaxSpeed);
+    Print (L"Found %u (%u ports, speed %u) on 0x%p @ %2X:%2X.%2X\n", i, Ports, MaxSpeed, UsbHcHandles[i], PciBus, PciDevice, PciFuntion);
     for (UINTN g = 0; g < Ports; g++) {
       Status = UsbHc->GetRootHubPortStatus (UsbHc, g, &portStatus);
       Print (L" Port %u status 0x%X, 0x%X\n", g, portStatus.PortStatus, portStatus.PortChangeStatus);

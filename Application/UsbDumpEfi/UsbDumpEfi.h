@@ -37,5 +37,6 @@
 
 // Consumed protocols.
 #include <Protocol/Usb2HostController.h>
+#include <Protocol/PciIo.h>
 
 #endif
